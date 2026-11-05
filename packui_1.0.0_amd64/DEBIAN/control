@@ -3,5 +3,7 @@ Source: packui
 Version: 1.0.0
 Architecture: amd64
 Maintainer: Freetime Maker <FreetimeMaker@proton.me>
-Description: An GUI App Store for Linux using Package Managers (dnf, apt and more).
-Depends: python3 (>= 3.9), python3-gi, gir1.2-gtk-3.0
+Depends: python3 (>= 3.9), python3-pyqt6
+Description: PyQt6 interface for installed Linux package managers
+ PackUI manages packages through locally installed Linux package managers,
+ without using store APIs.

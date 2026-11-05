@@ -1,116 +1,69 @@
-# Luma Store Linux
+# PackUI
 
-Luma Store Linux is a free and open-source desktop client store for the Luma Store API, tailored specifically for Linux systems. It provides a modern, high-performance user interface to easily browse, search, and manage native Linux applications.
+PackUI ist eine Linux-Paketverwaltung mit **Python 3 und PyQt6**. Sie nutzt die auf dem Rechner installierten Paketmanager direkt – keine Store-API, kein Supabase und keine Anmeldung.
 
-Built with **Python 3** and **GTK 3**.
+## Funktionen
 
-![Preview of Luma Store](preview.png)
+- Automatische Erkennung von **APT, DNF, Pacman, Zypper, Flatpak und Snap**.
+- Paketmanager auswählen, installierte Pakete anzeigen und nach Namen filtern.
+- Verfügbare Pakete suchen (bei DNF nach Paketnamen).
+- Pakete nach expliziter Bestätigung installieren oder entfernen.
+- Befehle und Transaktionsausgaben im Protokoll anzeigen.
+- Paketmanager laufen in einem Hintergrundthread; die Oberfläche bleibt reaktionsfähig.
 
-## Features
+## Starten
 
-### Supported Formats
-*   **DEB Packages:** Downloads Debian `.deb` packages directly to your system's `~/Downloads` folder and triggers your standard default package installer (e.g., Ubuntu Software, GDebi).
-*   **RPM Packages:** Downloads Red Hat `.rpm` packages to `~/Downloads` and integrates seamlessly with your standard package management utility (e.g., Fedora Software, Discover).
+Voraussetzungen: Python >= 3.9, PyQt6 und mindestens einer der unterstützten Paketmanager. Für Änderungen an Systempaketen wird zusätzlich `pkexec` mit einem laufenden Polkit-Authentifizierungsagenten benötigt. **PackUI nicht mit sudo starten.**
 
-### Key Capabilities
-*   **Liquid Glass UI:** Native GTK 3 surfaces now use translucent glass panels, rounded controls, subtle borders, gradients and shadows throughout the store.
-*   **Native Developer Dashboard:** The GTK dashboard now mirrors the web developer portal without embedding a WebView. It supports drafts, new submissions and updates for Android, Windows and Linux, multi-platform artifacts, optional per-platform repositories and store metadata, editing approved/rejected/change-requested submissions, delete/archive actions, status timelines, security scans, version history, review comments and developer notifications.
-*   **Developer Analytics:** Native 7/30/90-day download analytics with app/platform filters, per-app and per-platform totals, daily activity and funding-link clicks.
-*   **Developer Profile & Funding:** Edit the public developer profile and all developer-wide donation methods, including the same cryptocurrency/network wallet fields as the web dashboard.
-*   **App Metadata Management:** Full native metadata editing includes categories, license, icon, descriptions, English plus additional localized store metadata, screenshots, author links, source/repository information, Android package/versionCode, APK/EXE/MSI/DEB/RPM artifacts and platform-specific metadata.
-*   **Fastlane metadata assistant:** Android metadata can be loaded natively from `fastlane/metadata/android/<locale>` on GitHub, including title, descriptions, changelog and phone screenshots, with the same versionCode/default changelog fallback used by the web dashboard.
-*   **App Discovery & Search:** Instantly loads available software from the API feed and features a live search activation view.
-*   **Dynamic Category Navigation:** Simple filtering using computed category indices directly from the server feed, with an interactive reset selector to view all applications.
-*   **Rich Dynamic Information:** Renders application icons, descriptions, versions, file sizes, and automatically parses any additional structural keys provided by the API backend.
-*   **Screenshots Showcase:** Embedded horizontal gallery view displaying app screenshots dynamically.
-*   **Asynchronous Background Threads:** Avoids blocking or freezing the store's interface by offloading downloads and image assets processing onto isolated worker threads.
-
-## Installation
-
-### Linux
-
-#### Debian / Ubuntu (APT)
-1. Use the APT Repository setup:
+Debian / Ubuntu:
 
 ```bash
-sudo nano /etc/apt/sources.list.d/Freetime-Repo.list
+sudo apt install python3-pyqt6 policykit-1
+python3 packui.py
 ```
 
-then add:
-```text
-deb [trusted=yes arch=amd64] https://apt.fury.io/freetimemaker/ /
-```
-
-then run:
-```bash
-sudo apt update
-sudo apt install store
-```
-
-#### Fedora / Red Hat (RPM)
-1. Use the YUM Repository setup:
+Fedora:
 
 ```bash
-sudo nano /etc/yum.repos.d/freetime.repo
+sudo dnf install python3-pyqt6 polkit
+python3 packui.py
 ```
 
-then add:
-```text
-[freetimemaker]
-name=Freetime Repo
-baseurl=https://yum.fury.io/freetimemaker/
-enabled=1
-gpgcheck=0
-```
+Alternativ in einer virtuellen Umgebung:
 
-then run:
 ```bash
-sudo dnf install store -y --refresh
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python packui.py
 ```
 
-## Native Developer Dashboard
+## Bedienung und Grenzen
 
-The Developer Dashboard uses `supabase-py` with Supabase OAuth and PKCE. OAuth consent opens in the system browser and returns to the running GTK app through:
+1. Paketmanager und Ansicht wählen.
+2. Optional einen Filter eingeben; bei „Pakete suchen“ ist ein Suchbegriff erforderlich.
+3. „Laden / Suchen“ drücken, eine Zeile auswählen und installieren oder entfernen.
+4. Nach einer Änderung die Paketliste erneut laden.
 
-`http://127.0.0.1:8765/auth/callback`
+PackUI verwaltet keine eigenen Paketquellen und aktualisiert nicht automatisch alle Pakete. Die Paketmanager verwenden ihre vorhandene Konfiguration, Paketlisten und Repositories. Suche und Installation können deshalb Netzwerkzugriffe auslösen. Flatpak-Neuinstallationen erfolgen für den aktuellen Benutzer und benötigen einen bereits konfigurierten Benutzer-Remote. Beim Entfernen wird die ermittelte Benutzer-/Systeminstallation verwendet; benannte Flatpak-Installationen werden nicht unterstützt. Snap benötigt einen laufenden snapd-Dienst.
 
-That callback must be present in the Luma Store Supabase project's allowed redirect URLs. The `supabase-py` auth client persists and refreshes the session through a small file-backed storage adapter at `~/.config/luma-store/session.json` with user-only file permissions.
+Systemänderungen können auch Abhängigkeiten betreffen. PackUI bestätigt den gewählten Befehl vorab, führt den Paketmanager danach jedoch nichtinteraktiv aus. Es zeigt keine separate Vorschau aller Abhängigkeitsänderungen. Während ein Vorgang läuft, sind weitere Befehle und das Schließen des Fensters gesperrt, damit keine Pakettransaktion abgebrochen wird. Leseabfragen haben ein Zeitlimit von 120 Sekunden, Änderungen bewusst nicht.
 
-No WebView is used. The dashboard reads and writes the same Supabase data as the web portal. Drafts can be saved before the submission is complete. Final submissions and metadata updates require GitHub login because the Luma Store backend verifies repository ownership/write access using the GitHub provider token.
+## Installation und Pakete bauen
 
-DEB and RPM build targets vendor the pinned `supabase-py` runtime into `/usr/lib/luma-store/vendor`, so installed packages do not depend on a separately installed system-wide `supabase` Python package.
+```bash
+sudo make install
+make deb
+make rpm
+sudo make uninstall
+```
 
-The native dashboard also exposes the web portal's developer analytics, submission timelines, security/VirusTotal information, app version history, notifications, review comments and README download-badge copying.
+Die Installation verwendet das systemweite PyQt6; es werden keine Python-Abhängigkeiten mit Root-Pip nachinstalliert. Zum Paketbau werden `dpkg-deb` beziehungsweise `rpmbuild` benötigt.
 
-## Makefile Commands
+## Tests
 
-If you want to build Luma Store Linux from source, ensure you have the following packages installed:
-* `python3`
-* `gtk3`
-* `pygobject`
-* `python3-pip` (for source/package builds)
-* `supabase==2.31.0`
-<br>
-<br>
+```bash
+QT_QPA_PLATFORM=offscreen python3 -m unittest -v test_packui
+python3 -m py_compile packui.py
+```
 
-Install locally:
-
-`sudo make install`
-
-or if you want to bundle a Debian package:
-
-`make deb`
-
-or for the Red Hat RPM package:
-
-`make rpm`
-<br>
-<br>
-
-## Contribute
-
-### Development
-Pull requests and bug reports are welcome on the repository.
-
----
-**Disclaimer**: Installing applications handles code packages over remote integration. Always verify the source packages you install. Use at your own risk.
+Die Tests verwenden Beispielausgaben und führen keine Paketänderungen aus.
