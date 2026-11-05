@@ -1,0 +1,7 @@
+Package: packui
+Source: packui
+Version: 1.0.0
+Architecture: amd64
+Maintainer: Freetime Maker <FreetimeMaker@proton.me>
+Description: An GUI App Store for Linux using Package Managers (dnf, apt and more).
+Depends: python3 (>= 3.9), python3-gi, gir1.2-gtk-3.0

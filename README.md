@@ -1,7 +1,5 @@
 # Luma Store Linux
 
-[![Luma Store downloads](https://ndlaevedujqxhygbyxfh.supabase.co/functions/v1/download-badge?package_name=com.freetime.lumastore)](https://luma.free-time.me/discover/com.freetime.lumastore)
-
 Luma Store Linux is a free and open-source desktop client store for the Luma Store API, tailored specifically for Linux systems. It provides a modern, high-performance user interface to easily browse, search, and manage native Linux applications.
 
 Built with **Python 3** and **GTK 3**.

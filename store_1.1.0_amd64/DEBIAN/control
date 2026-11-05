@@ -1,7 +1,0 @@
-Package: store
-Source: store
-Version: 1.1.0
-Architecture: amd64
-Maintainer: Freetime Maker <FreetimeMaker@proton.me>
-Description: The Linux Version of Luma Store.
-Depends: python3 (>= 3.9), python3-gi, gir1.2-gtk-3.0
