@@ -115,12 +115,66 @@ class QtTests(unittest.TestCase):
     def test_package_display_and_actions(self, detect, load):
         window = PackUIWindow()
         window.packages_loaded("vim\t9.0\tinstalled\n")
-        self.assertEqual(window.table.item(0, 0).text(), "vim")
-        window.table.selectRow(0)
+        self.assertEqual(window.cards.item(0).text(), "vim")
+        window.cards.setCurrentRow(0)
         self.assertTrue(window.remove.isEnabled())
         self.assertFalse(window.install.isEnabled())
         window.reset_view()
         self.assertFalse(window.remove.isEnabled())
+        window.close()
+
+    @patch(
+        "packui.PackageManager.detect",
+        return_value=[PackageManager("APT", "/usr/bin/apt-get")],
+    )
+    @patch("packui.PackUIWindow.start_command")
+    def test_store_navigation_and_category_search(self, start, detect):
+        window = PackUIWindow()
+        self.assertEqual(window.pages.currentIndex(), 0)
+        self.assertTrue(window.discover_nav.isChecked())
+        start.assert_not_called()
+        with patch("packui.shutil.which", return_value="/usr/bin/apt-cache"):
+            window.browse("Kreativität", "gimp")
+        self.assertEqual(window.pages.currentIndex(), 1)
+        self.assertEqual(window.search.text(), "gimp")
+        self.assertFalse(window.query_installed)
+        self.assertEqual(start.call_args.args[0][-1], "gimp")
+        window.show_discover()
+        self.assertEqual(window.pages.currentIndex(), 0)
+        self.assertEqual(window.cards.count(), 0)
+        window.close()
+
+    @patch(
+        "packui.PackageManager.detect",
+        return_value=[PackageManager("APT", "/usr/bin/apt-get")],
+    )
+    def test_card_detail_and_empty_results(self, detect):
+        window = PackUIWindow()
+        window.query_installed = False
+        window.packages_loaded("vim - Text editor\n")
+        window.cards.setCurrentRow(0)
+        self.assertTrue(window.install.isEnabled())
+        self.assertFalse(window.remove.isEnabled())
+        from PyQt6.QtCore import QRect
+        from PyQt6.QtGui import QPainter, QPixmap
+        from PyQt6.QtWidgets import QStyleOptionViewItem
+
+        image = QPixmap(292, 184)
+        painter = QPainter(image)
+        option = QStyleOptionViewItem()
+        option.rect = QRect(0, 0, 292, 184)
+        try:
+            window.cards.itemDelegate().paint(
+                painter, option, window.cards.model().index(0, 0)
+            )
+        finally:
+            painter.end()
+        window.open_details(window.cards.item(0))
+        self.assertIsNotNone(window.detail)
+        window.detail.close()
+        window.packages_loaded("")
+        self.assertEqual(window.cards.count(), 0)
+        self.assertFalse(window.empty.isHidden())
         window.close()
 
     def test_worker_query_success(self):

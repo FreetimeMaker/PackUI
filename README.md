@@ -4,6 +4,8 @@ PackUI ist eine Linux-Paketverwaltung mit **Python 3 und PyQt6**. Sie nutzt die 
 
 ## Funktionen
 
+- App-Store-Oberfläche mit Entdecken-Startseite, Themenkacheln und Seitenleiste.
+- App-Karten mit lokalen Icons, Beschreibungen und einer Detailansicht.
 - Automatische Erkennung von **APT, DNF, Pacman, Zypper, Flatpak und Snap**.
 - Paketmanager auswählen, installierte Pakete anzeigen und nach Namen filtern.
 - Verfügbare Pakete suchen (bei DNF nach Paketnamen).
@@ -39,10 +41,12 @@ python3 -m venv .venv
 
 ## Bedienung und Grenzen
 
-1. Paketmanager und Ansicht wählen.
-2. Optional einen Filter eingeben; bei „Pakete suchen“ ist ein Suchbegriff erforderlich.
-3. „Laden / Suchen“ drücken, eine Zeile auswählen und installieren oder entfernen.
-4. Nach einer Änderung die Paketliste erneut laden.
+1. In der Seitenleiste eine Paketquelle auswählen.
+2. Unter „Entdecken“ ein Thema öffnen oder einen Suchbegriff eingeben und „Suchen“ drücken. Themen starten vordefinierte Suchanfragen, keine externen Store-Abfragen.
+3. Eine App-Karte anklicken, Details ansehen und die Installation bestätigen.
+4. Unter „Installiert“ vorhandene Apps und Pakete anzeigen, filtern oder entfernen. Nach einer Änderung diese Ansicht erneut öffnen.
+
+Namen, Beschreibungen und Icons werden nach Möglichkeit aus lokalen `.desktop`-Dateien ergänzt. Fehlen Metadaten, zeigt PackUI den Paketnamen und die Informationen des Paketmanagers. Bewertungen, Downloadzahlen und Screenshots werden nicht erfunden. Native Paketquellen liefern auch Bibliotheken und Systemwerkzeuge; diese bleiben als Pakete sichtbar. Über „Protokoll“ lassen sich die technischen Befehle und Ausgaben einblenden.
 
 PackUI verwaltet keine eigenen Paketquellen und aktualisiert nicht automatisch alle Pakete. Die Paketmanager verwenden ihre vorhandene Konfiguration, Paketlisten und Repositories. Suche und Installation können deshalb Netzwerkzugriffe auslösen. Flatpak-Neuinstallationen erfolgen für den aktuellen Benutzer und benötigen einen bereits konfigurierten Benutzer-Remote. Beim Entfernen wird die ermittelte Benutzer-/Systeminstallation verwendet; benannte Flatpak-Installationen werden nicht unterstützt. Snap benötigt einen laufenden snapd-Dienst.
 
